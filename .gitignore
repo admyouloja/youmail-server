@@ -36,3 +36,6 @@ storage/mysql/*
 storage/redis/*
 !storage/mysql/.gitkeep
 !storage/redis/.gitkeep
+
+# Versionar somente modelos de ambiente
+!**/.env.example

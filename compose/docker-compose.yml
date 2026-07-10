@@ -59,7 +59,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          "redis-cli -a \"$${REDIS_PASSWORD}\" ping | grep PONG"
+          "REDISCLI_AUTH=\"$${REDIS_PASSWORD}\" redis-cli ping | grep PONG"
         ]
       interval: 10s
       timeout: 5s
