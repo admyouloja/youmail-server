@@ -1,0 +1,87 @@
+name: ${COMPOSE_PROJECT_NAME:-youmail}
+
+services:
+  mariadb:
+    image: ${MARIADB_IMAGE:-mariadb:11.8}
+    container_name: youmail-mariadb
+    restart: unless-stopped
+
+    environment:
+      TZ: ${TZ:-America/Sao_Paulo}
+      MARIADB_DATABASE: ${MARIADB_DATABASE}
+      MARIADB_USER: ${MARIADB_USER}
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD}
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
+      MARIADB_AUTO_UPGRADE: "1"
+
+    volumes:
+      - youmail_mariadb_data:/var/lib/mysql
+      - ../config/mysql/my.cnf:/etc/mysql/conf.d/youmail.cnf:ro
+
+    networks:
+      - youmail-internal
+
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "healthcheck.sh",
+          "--connect",
+          "--innodb_initialized"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+
+    security_opt:
+      - no-new-privileges:true
+
+  redis:
+    image: ${REDIS_IMAGE:-redis:8.2}
+    container_name: youmail-redis
+    restart: unless-stopped
+
+    command:
+      - redis-server
+      - /usr/local/etc/redis/redis.conf
+      - --requirepass
+      - ${REDIS_PASSWORD}
+
+    volumes:
+      - youmail_redis_data:/data
+      - ../config/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+
+    networks:
+      - youmail-internal
+
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "redis-cli -a \"$${REDIS_PASSWORD}\" ping | grep PONG"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+    environment:
+      TZ: ${TZ:-America/Sao_Paulo}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+
+    security_opt:
+      - no-new-privileges:true
+
+networks:
+  youmail-internal:
+    name: youmail-internal
+    driver: bridge
+    internal: true
+
+volumes:
+  youmail_mariadb_data:
+    name: youmail_mariadb_data
+
+  youmail_redis_data:
+    name: youmail_redis_data

@@ -24,3 +24,15 @@ infrastructure/logs/*
 infrastructure/backup/*
 !infrastructure/logs/.gitkeep
 !infrastructure/backup/.gitkeep
+# YouMail environment files
+compose/env/.env.development
+compose/env/.env.production
+compose/.env
+.env.production
+.env.development
+
+# Runtime storage
+storage/mysql/*
+storage/redis/*
+!storage/mysql/.gitkeep
+!storage/redis/.gitkeep
